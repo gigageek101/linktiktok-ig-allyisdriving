@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>for the curious ones 👀</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="description" content="Open in your browser to continue."/>
+  <style>
+    :root{
+      --text:#fff;
+      --muted:#d8d8e0;
+      --card:rgba(10,10,16,.72);
+      --accent:#98f5ff;
+      --ring:rgba(152,245,255,.25);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Inter, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji", "Segoe UI Symbol";
+      display:flex; align-items:center; justify-content:center; padding:24px;
+      background: url('background.jpg') center center / cover no-repeat fixed;
+      position: relative;
+    }
+    /* subtle dark overlay for readability */
+    .overlay{
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 0;
+    }
+    .container{width:100%; max-width:720px; display:grid; gap:18px; position:relative; z-index: 1;}
+    .top-box,.bottom-box{
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:18px 20px;
+      box-shadow:0 20px 60px rgba(0,0,0,.35);
+      backdrop-filter: blur(8px) saturate(140%);
+    }
+    h1{margin:0 0 6px 0; font-size:1.7rem; letter-spacing:-.02em}
+    p{margin:0; color:var(--muted)}
+    .steps{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      padding:14px 16px; border-radius:14px; font-weight:700;
+    }
+    .bottom-box{display:grid; gap:12px}
+    .gif-container{
+      margin-top:6px;
+      border-radius:16px; overflow:hidden;
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 10px 40px rgba(0,0,0,.35);
+    }
+    .gif-container img{display:block; width:100%; height:auto}
+    /* pointer + wave (top-right) */
+    #finger-pointer{
+      position:fixed; top:14px; right:14px; width:42px; height:auto; z-index:5;
+      animation: bob 1.5s ease-in-out infinite;
+      filter: drop-shadow(0 6px 18px rgba(0,0,0,.5));
+      pointer-events:none;
+      display:none;
+    }
+    @keyframes bob {
+      0%,100%{ transform: translateY(0) rotate(-8deg); }
+      50%{ transform: translateY(-4px) rotate(-8deg); }
+    }
+    .pointer-wave{
+      position:fixed; top:22px; right:22px; width:28px; height:28px; z-index:4;
+      border-radius:999px; pointer-events:none; display:none;
+    }
+    .pointer-wave::before,.pointer-wave::after{
+      content:""; position:absolute; inset:0; border-radius:999px;
+      border:2px solid var(--accent);
+      animation: ripple 1.8s ease-out infinite;
+      box-shadow:0 0 0 4px var(--ring) inset;
+    }
+    .pointer-wave::after{ animation-delay:.9s; opacity:.7 }
+    @keyframes ripple{
+      0%{ transform: scale(.6); opacity: .8 }
+      100%{ transform: scale(2.4); opacity: 0 }
+    }
+    /* hide UI until JS decides; then add .visible */
+    .top-box,.bottom-box{ display:none; }
+    .visible{ display:block !important; }
+    /* mobile spacing */
+    @media (max-width:520px){
+      h1{font-size:1.42rem}
+    }
+    /* neutralize any injected overlays */
+    #screenity-ui, #screenity-ui *{ all: unset; }
+  </style>
+</head>
+<body onload="checkBrowser()">
+  <div class="overlay"></div>
+
+  <div class="pointer-wave"></div>
+  <img id="finger-pointer" src="finger.png" alt="Pointer">
+
+  <div class="container">
+    <div class="top-box">
+      <h1>for the curious ones 👀</h1>
+      <p>follow these steps:</p>
+    </div>
+
+    <div class="bottom-box">
+      <div class="steps">1. Tap the three dots in the top right corner</div>
+      <div class="steps">2. Select "Open in browser"</div>
+      <div class="gif-container">
+        <img src="https://s6.gifyu.com/images/bz27i.gif" alt="How to open in browser">
+      </div>
+    </div>
+  </div>
+
+  <div id="screenity-ui"><div class="screenity-shadow-dom"><div><div></div><div></div></div><style type="text/css"></style></div></div>
+
+  <script>
+    // Redirect target for real browsers:
+    const TARGET_URL = "https://heyallisonmylinks.netlify.app/";
+
+    function isInAppBrowser(){
+      const ua = navigator.userAgent || navigator.vendor || window.opera || "";
+      const hay = ua.toLowerCase();
+      const needles = [
+        "instagram","fb_iab","fb4a","fban","fbav","facebook",
+        "tiktok","twitter","line","kakaotalk","snapchat",
+        "micromessenger","wechat","pinterest","reddit",
+        "telegram","linkedin"
+      ];
+      return needles.some(n => hay.includes(n));
+    }
+
+    function showInstructionUI(show){
+      const top = document.querySelector(".top-box");
+      const bottom = document.querySelector(".bottom-box");
+      const finger = document.getElementById("finger-pointer");
+      const wave = document.querySelector(".pointer-wave");
+      if(show){
+        [top,bottom,finger,wave].forEach(el => el && el.classList.add("visible"));
+      }else{
+        [top,bottom,finger,wave].forEach(el => el && el.classList.remove("visible"));
+      }
+    }
+
+    function checkBrowser(){
+      if(isInAppBrowser()){
+        showInstructionUI(true);
+        return;
+      }
+      const q = location.search || "";
+      const hash = location.hash || "";
+      const url = new URL(TARGET_URL);
+      if(q && !url.search) url.search = q;
+      if(hash && !url.hash) url.hash = hash;
+      const same = (url.origin === location.origin) && (url.pathname === location.pathname);
+      if(!same) window.location.replace(url.toString());
+      else showInstructionUI(true);
+    }
+  </script>
+</body>
+</html>
