@@ -30,7 +30,7 @@
       content:'';
       position:fixed;
       inset:0;
-      background: url('background.jpg') center center / cover no-repeat;
+      background: url('background.png') center center / cover no-repeat;
       z-index:0;
     }
     body::after{
@@ -163,11 +163,33 @@
       .step{font-size:0.78rem;padding:10px}
       .container{max-width:300px}
     }
+    .debug-info{
+      position:fixed;
+      bottom:10px;
+      left:50%;
+      transform:translateX(-50%);
+      background:rgba(0,0,0,.8);
+      color:#0f0;
+      padding:8px 16px;
+      border-radius:8px;
+      font-size:0.7rem;
+      font-family:monospace;
+      z-index:999;
+      max-width:90%;
+      text-align:center;
+      word-break:break-all;
+      display:none;
+    }
+    .debug-info.visible{
+      display:block;
+    }
   </style>
 </head>
 <body>
   <div class="pointer-wave"></div>
   <img id="finger-pointer" src="finger.png" alt="Pointer">
+
+  <div class="debug-info" id="debug-info"></div>
 
   <div class="container">
     <div class="card">
@@ -215,6 +237,14 @@
       return false;
     }
 
+    function showDebugInfo(message){
+      const debug = document.getElementById("debug-info");
+      if(debug){
+        debug.textContent = message;
+        debug.classList.add("visible");
+      }
+    }
+
     function showInstructionUI(show){
       const container = document.querySelector(".container");
       const finger = document.getElementById("finger-pointer");
@@ -239,18 +269,27 @@
       
       // Test mode: add ?test=true to URL to preview in-app browser view
       const urlParams = new URLSearchParams(window.location.search);
+      const showDebug = urlParams.get('debug') === 'true';
+      
+      if(showDebug){
+        showDebugInfo('UA: ' + navigator.userAgent.substring(0, 80) + '... | In-App: ' + isInAppBrowser());
+      }
+      
       if(urlParams.get('test') === 'true'){
         showInstructionUI(true);
+        if(showDebug) showDebugInfo('TEST MODE - In-App Browser View');
         return;
       }
       
       if(isInAppBrowser()){
         console.log('In-app browser detected - showing instructions');
         showInstructionUI(true);
+        if(showDebug) showDebugInfo('In-App Browser Detected');
         return;
       }
       
       console.log('Regular browser detected - redirecting to:', TARGET_URL);
+      if(showDebug) showDebugInfo('Regular Browser - Redirecting...');
       
       // Regular browser - redirect
       const q = location.search || "";
